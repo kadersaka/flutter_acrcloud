@@ -100,4 +100,10 @@ class ACRCloud {
     _channel.invokeMethod('listen');
     return _session!;
   }
+
+  /// Release the recorder and all resources immediately.
+  /// Used to resolve microphone hardware conflicts.
+  static Future<void> release() async {
+    await _channel.invokeMethod('release');
+  }
 }
