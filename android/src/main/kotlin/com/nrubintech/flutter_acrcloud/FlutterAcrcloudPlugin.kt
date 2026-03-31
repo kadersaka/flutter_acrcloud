@@ -79,8 +79,8 @@ class FlutterAcrcloudPlugin: FlutterPlugin, MethodCallHandler, PluginRegistry.Re
       // The hardware 8kHz AudioRecord can remain held even after onResult fires
       // (which auto-resets isListening=false). client.cancel() fully releases it.
       try {
-        if (::client.isInitialized) {
-          client.cancel()  // Full stop + hardware AudioRecord release
+        if (client != null) {
+          client!!.cancel()  // Full stop + hardware AudioRecord release
         }
       } catch (e: Exception) {
         // Ignore — we're releasing resources
@@ -135,7 +135,7 @@ class FlutterAcrcloudPlugin: FlutterPlugin, MethodCallHandler, PluginRegistry.Re
 
   private inner class ACRListener : IACRCloudListener {
     override fun onResult(result: ACRCloudResult?) {
-      client.stopRecordToRecognize()
+      client?.stopRecordToRecognize()
       isListening = false
       channel.invokeMethod("result", result?.result)
     }
