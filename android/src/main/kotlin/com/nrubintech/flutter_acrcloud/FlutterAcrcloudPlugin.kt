@@ -40,12 +40,15 @@ class FlutterAcrcloudPlugin: FlutterPlugin, MethodCallHandler, PluginRegistry.Re
   private var currentActivity: Activity? = null
 
   private lateinit var config: ACRCloudConfig
-  private lateinit var client: ACRCloudClient
+  
+  companion object {
+    private var client: ACRCloudClient? = null
+    private var isListening = false
+  }
 
   private var onPermissionGrant: (() -> Unit)? = null
 
   private var isPermissionGranted = false
-  private var isListening = false
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
     if (call.method == "setUp") {
@@ -67,7 +70,7 @@ class FlutterAcrcloudPlugin: FlutterPlugin, MethodCallHandler, PluginRegistry.Re
       }
 
       isListening = true
-      client.startRecognize()
+      client?.startRecognize()
       result.success(true)
     }
 
@@ -89,9 +92,9 @@ class FlutterAcrcloudPlugin: FlutterPlugin, MethodCallHandler, PluginRegistry.Re
     else if (call.method == "release") {
       // Explicit full teardown: cancels recognition and releases all native resources.
       try {
-        if (::client.isInitialized) {
-          client.cancel()
-          client.release()
+        if (client != null) {
+          client!!.cancel()
+          client!!.release()
         }
       } catch (e: Exception) {
         // Ignore
@@ -121,7 +124,7 @@ class FlutterAcrcloudPlugin: FlutterPlugin, MethodCallHandler, PluginRegistry.Re
     config.protocol = ACRCloudConfig.NetworkProtocol.HTTPS
 
     client = ACRCloudClient()
-    client.initWithConfig(config)
+    client!!.initWithConfig(config)
 
     result.success(true)
   }
